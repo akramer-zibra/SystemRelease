@@ -26,6 +26,31 @@ class SystemReleaseService implements \Zend\ServiceManager\ServiceManagerAwareIn
     protected $eventManager;
     
     
+    /**
+     * This function builds a server identification string using application_env 
+     * environment variable and PHP Server Name value
+     * 
+     * @return string
+     */
+    private function getServerIdentificationString() {
+       
+        // initialize String
+        $serverIdentificator = '';
+        
+        // get APPLICATION_ENV value, if its specified
+        $applicationEnv = getenv('APPLICATION_ENV');
+        
+        // check if APPLICATION_ENV is given
+        if(!empty($applicationEnv)) {
+            
+            $serverIdentificator .= strtoupper(getenv('APPLICATION_ENV')) . ' ';
+        }
+        
+        // attach PHP server name
+        $serverIdentificator .= '('. $_SERVER['SERVER_NAME'] .')';
+        
+        return $serverIdentificator;
+    }
     
     /**
      * This funtion injects a "System Release Bar" into final rendered View
@@ -36,9 +61,7 @@ class SystemReleaseService implements \Zend\ServiceManager\ServiceManagerAwareIn
         // load HTML response and inject HTML code
         $responseContent = $e->getResponse()->getContent();
         
-        
-        $injectedHTML = str_replace('<body>', '<body>
-            <div style="width: 100%; height: 38px; background-color: orange; position: fixed; top: 0px; left: 0px; float: left; z-index: 1040;"><div style="width: 800px; margin: 0 auto; text-align: center; line-height: 38px; vertical-align: middle;">System: LOKAL ACHIM</div></div>',
+        $injectedHTML = str_replace('</body>', '<div style="width: 100%; height: 38px; background-color: orange; position: fixed; bottom: 0px; left: 0px; float: left; z-index: 1040;"><div style="width: 800px; margin: 0 auto; text-align: center; line-height: 38px; vertical-align: middle;">System: '. $this->getServerIdentificationString() .'</div></div></body>',
                 $responseContent);       
         
         // set "injected" Content
